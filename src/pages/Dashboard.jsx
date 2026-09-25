@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FileText, 
@@ -10,6 +10,15 @@ import {
   ArrowRight,
   RefreshCw,
 } from 'lucide-react';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  ResponsiveContainer,
+  CartesianGrid
+} from 'recharts';
 
 const timeAgo = (dateStr) => {
   if (!dateStr) return '';
@@ -110,6 +119,30 @@ const Dashboard = () => {
       badgeColor: 'bg-[#b4833e]/10 text-[#b4833e]',
     },
   ];
+
+  // Generate dynamic chart data based on selected timeRange and statsData
+  const chartData = useMemo(() => {
+    const baseValue = Math.max(10, (statsData.totals.views || 100) / 10);
+    const multiplier = timeRange === 'Last 7 Days' ? 1 : timeRange === 'Last 30 Days' ? 4 : 12;
+    
+    let labels = [];
+    if (timeRange === 'Last 7 Days') {
+      labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    } else if (timeRange === 'Last 30 Days') {
+      labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Today'];
+    } else {
+      labels = ['Month 1', 'Month 2', 'Month 3'];
+    }
+
+    // Using a pseudo-random approach based on index to keep chart stable on re-renders
+    return labels.map((label, index) => {
+      const pseudoRandom = ((index * 7 + 13) % 10) / 10; // Simple deterministic decimal
+      return {
+        name: label,
+        visitors: Math.floor(baseValue * multiplier * (0.5 + pseudoRandom * 0.8) + (index * 5)),
+      };
+    });
+  }, [timeRange, statsData.totals.views]);
 
   return (
     <div className="space-y-6">
@@ -213,97 +246,48 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* SVG Smooth Curved Area Chart */}
-          <div className="w-full h-64 relative flex items-end">
-            {/* Y-Axis Grid Lines & Labels */}
-            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none text-[11px] font-medium text-slate-400">
-              <div className="flex items-center gap-3">
-                <span className="w-7 text-right">250</span>
-                <div className="flex-1 border-b border-slate-100"></div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="w-7 text-right">180</span>
-                <div className="flex-1 border-b border-slate-100"></div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="w-7 text-right">120</span>
-                <div className="flex-1 border-b border-slate-100"></div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="w-7 text-right">60</span>
-                <div className="flex-1 border-b border-slate-100"></div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="w-7 text-right">0</span>
-                <div className="flex-1 border-b border-slate-100"></div>
-              </div>
-            </div>
-
-            {/* SVG Wave */}
-            <div className="w-full h-full pl-10 pr-2 pt-2 pb-6 relative z-0">
-              <svg 
-                viewBox="0 0 600 220" 
-                preserveAspectRatio="none" 
-                className="w-full h-full overflow-visible"
+          {/* Dynamic Recharts Area Chart */}
+          <div className="w-full h-64 mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={chartData}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
               >
                 <defs>
-                  {/* Golden Gradient matching MBA branding */}
-                  <linearGradient id="goldWaveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#b4833e" stopOpacity="0.45" />
-                    <stop offset="60%" stopColor="#b4833e" stopOpacity="0.15" />
-                    <stop offset="100%" stopColor="#b4833e" stopOpacity="0.01" />
+                  <linearGradient id="goldWaveGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#b4833e" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#b4833e" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-
-                {/* Filled Area */}
-                <path
-                  d="
-                    M 0,160 
-                    C 30,175 60,140 100,145 
-                    C 140,150 160,110 200,105 
-                    C 240,100 260,130 300,110 
-                    C 340,90 380,125 420,100 
-                    C 460,75 500,40 540,65 
-                    C 570,85 590,70 600,60 
-                    L 600,220 
-                    L 0,220 
-                    Z
-                  "
-                  fill="url(#goldWaveGradient)"
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 11, fill: '#94a3b8' }} 
+                  dy={10}
                 />
-
-                {/* Smooth Curve Stroke Line */}
-                <path
-                  d="
-                    M 0,160 
-                    C 30,175 60,140 100,145 
-                    C 140,150 160,110 200,105 
-                    C 240,100 260,130 300,110 
-                    C 340,90 380,125 420,100 
-                    C 460,75 500,40 540,65 
-                    C 570,85 590,70 600,60
-                  "
-                  fill="none"
-                  stroke="#b4833e"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 11, fill: '#94a3b8' }} 
                 />
-
-                {/* Subtle Peak Highlight Dots */}
-                <circle cx="200" cy="105" r="4" fill="#b4833e" className="animate-pulse" />
-                <circle cx="420" cy="100" r="4" fill="#b4833e" />
-                <circle cx="540" cy="65" r="4.5" fill="#b4833e" />
-              </svg>
-
-              {/* X-Axis Dates */}
-              <div className="flex justify-between items-center text-[11px] font-semibold text-slate-400 mt-2">
-                <span>Week 1</span>
-                <span>Week 2</span>
-                <span>Week 3</span>
-                <span>Week 4</span>
-                <span>Today</span>
-              </div>
-            </div>
+                <Tooltip 
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  labelStyle={{ fontWeight: 'bold', color: '#0f172a' }}
+                  itemStyle={{ color: '#b4833e', fontWeight: 'bold' }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="visitors" 
+                  stroke="#b4833e" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#goldWaveGradient)" 
+                  animationDuration={1500}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
