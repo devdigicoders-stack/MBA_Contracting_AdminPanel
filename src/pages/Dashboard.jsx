@@ -104,6 +104,7 @@ const Dashboard = () => {
       icon: Clock,
       badgeColor: 'bg-amber-50 text-amber-600',
     },
+    /*
     {
       title: 'Total Blog Posts',
       value: statsData.totals.blogs.toString(),
@@ -118,6 +119,7 @@ const Dashboard = () => {
       icon: Eye,
       badgeColor: 'bg-[#b4833e]/10 text-[#b4833e]',
     },
+    */
   ];
 
   // Generate dynamic chart data based on selected timeRange and statsData
@@ -175,8 +177,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* 4 Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-5">
         {statCards.map((stat, idx) => {
           const Icon = stat.icon;
           return (
@@ -387,6 +389,7 @@ const Dashboard = () => {
           >
             <span>Review Leads</span>
           </Link>
+          {/*
           <Link 
             to="/blog" 
             className="px-5 py-2.5 bg-[#b4833e] hover:bg-[#9e7131] text-white font-semibold text-xs sm:text-sm rounded-lg shadow-md shadow-[#b4833e]/20 flex items-center gap-2 transition-all cursor-pointer shrink-0"
@@ -394,6 +397,7 @@ const Dashboard = () => {
             <span>Manage Blogs</span>
             <ArrowRight size={15} />
           </Link>
+          */}
         </div>
 
       </div>

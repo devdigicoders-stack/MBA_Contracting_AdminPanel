@@ -14,7 +14,7 @@ const Sidebar = () => {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Blog', path: '/blog', icon: FileText },
+    // { name: 'Blog', path: '/blog', icon: FileText },
     { name: 'Contact', path: '/contact', icon: MessageSquare },
     { name: 'Profile', path: '/profile', icon: User },
   ];
